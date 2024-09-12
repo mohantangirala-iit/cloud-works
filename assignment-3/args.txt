@@ -1,0 +1,11 @@
+ami-0e86e20dae9224db8
+t2.micro
+coursera-key
+sg-04f2d59399e727815
+3
+install-env.sh
+module3-tag
+jrh-tg
+jrh-elb
+us-east-1a
+us-east-1b
