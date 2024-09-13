@@ -36,11 +36,11 @@ echo $SUBNET2B
 
 echo 'Creating the TARGET GROUP and storing the ARN in $TARGETARN...'
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/create-target-group.html
-TARGETARN=$(aws elbv2 create-target-group --name $8 --protocol TCP --port 80 --target-type ip --vpc-id $VPCID --query "TargetGroups[*].TargetGroupArn" --output=text)
+TARGETARN=$(aws elbv2 create-target-group --name $8 --protocol HTTP --port 80 --target-type  --vpc-id $VPCID --query "TargetGroups[*].TargetGroupArn" --output=text)
 echo $TARGETARN
 echo "Creating ELBv2 Elastic Load Balancer..."
 #https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/create-load-balancer.html
-ELBARN=$(aws create-load-balancer --name $9 --query "LoadBalancers[*].LoadBalancerArn" --output=text)
+ELBARN=$(aws elbv2 create-load-balancer --subnets $SUBNET2A $SUBNET2B --name $9 --query "LoadBalancers[*].LoadBalancerArn" --output=text)
 echo $ELBARN
 
 # AWS elbv2 wait for load-balancer available
@@ -50,11 +50,11 @@ aws elbv2 wait load-balancer-available --load-balancer-arns $ELBARN
 echo "Load balancer available..."
 # create AWS elbv2 listener for HTTP on port 80
 #https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/create-listener.html
-aws elbv2 create-listener --load-balancer-arn $ELBARN --protocol HTTP --port 80  --default-actions Type=forward,TargetGroupArn=$TARGETARN
+aws elbv2 create-listener --load-balancer-arn $ELBARN --port 80 --default-actions Type=forward,TargetGroupArn=$TARGETARN --output=text --query 'Listeners[*].ListenerArn'
 
 echo "Beginning to create and launch instances..."
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/run-instances.html
-aws ec2 run-instances --image-id $1 --instance-type $2 --key-name $3 --security-group-ids $4 --count $5  --user-data file://$6 --tag-specifications "ResourceType=instance,Tags=[{Key=module,Value=$7}]"
+aws ec2 run-instances --image-id $1 --instance-type $2 --key-name $3 --security-group-ids $4 --count $5  --user-data file://$6 --tag-specifications "ResourceType=instance,Tags=[{Key=module,Value=$7}]" --output=text --query 'Instances[*].InstanceId'
 
 # Collect Instance IDs
 # https://stackoverflow.com/questions/31744316/aws-cli-filter-or-logic
@@ -74,7 +74,7 @@ if [ "$INSTANCEIDS" != "" ]
     INSTANCEIDSARRAY=($INSTANCEIDS)
     for INSTANCEID in ${INSTANCEIDSARRAY[@]};
       do
-      aws elbv2 register-targets --target-group-arn $TARGETARN --targets Id=INSTANCEID
+      aws elbv2 register-targets --target-group-arn $TARGETARN --targets Id=$INSTANCEID
       done
   else
     echo "There are no running or pending instances in $INSTANCEIDS to wait for..."
