@@ -9,5 +9,9 @@ jrh-tg
 jrh-elb
 us-east-1a
 us-east-1b
-mt-launch-template
-NgnxVersion1
+MT-launch-template
+MT-ASG
+5
+3
+3
+us-east1
