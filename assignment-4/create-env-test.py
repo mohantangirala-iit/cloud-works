@@ -84,13 +84,12 @@ except IndexError:
   sys.exit("No EC2 instances in the RUNNING STATE - check that you ran your create-env.sh or wait 30-60 seconds more to make sure your instances are in the running state.")
 
 if len(responseEC2['Reservations'][0]['Instances']) == correctNumberOfEC2Instances:
-    print("Correct number of EC2 instances created, expecting " + str(correctNumberOfEC2Instances) + ", received " + str(len(responseEC2['Reservations'][0]['Instances'])) + " instances...")
+    print("Correct number of EC2 instances created, expecting " + str(correctNumberOfEC2Instances) + ", received " + str(len(responseEC2['Reservations'][0]['Instances'])) + ".")
     for n in range(0,len(responseEC2['Reservations'][0]['Instances'])):
       print("InstanceID of: " + responseEC2['Reservations'][0]['Instances'][n]['InstanceId'])
-    
     grandtotal += 1
 else:
-    print("Incorrect Number of EC2 instances created, expecting " + str(correctNumberOfEC2Instances) + ", received " + str(len(responseEC2['Reservations'][0]['Instances'])) + " instances...")
+    print("Incorrect Number of EC2 instances created, expecting " + str(correctNumberOfEC2Instances) + ", received " + str(len(responseEC2['Reservations'][0]['Instances'])) + ".")
     for n in range(0,len(responseEC2['Reservations'][0]['Instances'])):
       print("InstanceID of: " + responseEC2['Reservations'][0]['Instances'][n]['InstanceId'])
 
