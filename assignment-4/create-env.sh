@@ -65,7 +65,7 @@ LAUNCHTEMPLATEID=$LTVAR
 
 echo 'Creating the TARGET GROUP and storing the ARN in $TARGETARN'
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/create-target-group.html
-TARGETARN=$(aws elbv2 create-target-group --name $8 --protocol HTTP --port 80 --target-type  --vpc-id $VPCID --query "TargetGroups[*].TargetGroupArn" --output=text)
+TARGETARN=$(aws elbv2 create-target-group --name $8 --protocol HTTP --port 80  --vpc-id $VPCID --query "TargetGroups[*].TargetGroupArn" --output=text)
 echo $TARGETARN
 
 echo "Creating ELBv2 Elastic Load Balancer..."
@@ -75,22 +75,23 @@ echo $ELBARN
 
 # Decrease the deregistration timeout (deregisters faster than the default 300 second timeout per instance)
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/modify-target-group-attributes.html
-aws elbv2 modify-target-group-attributes --target-group-arn $TARGETARN --attributes Key=deregistration_delay.timeout_seconds,Value=30
+aws elbv2 modify-target-group-attributes --target-group-arn $TARGETARN --attributes Key=deregistration_delay.timeout_seconds,Value=30 --output=text
 
 # AWS elbv2 wait for load-balancer available
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/wait/load-balancer-available.html
 echo "Waiting for load balancer to be available..."
-aws elbv2 wait load-balancer-available
+aws elbv2 wait load-balancer-available --load-balancer-arns $ELBARN
 echo "Load balancer available..."
+
 # create AWS elbv2 listener for HTTP on port 80
 #https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/create-listener.html
-aws elbv2 create-listener --load-balancer-arn $ELBARN --port 80 --default-actions Type=forward,TargetGroupArn=$TARGETARN --output=text --query 'Listeners[*].ListenerArn' 
+aws elbv2 create-listener --load-balancer-arn $ELBARN --port 80 --protocol HTTP --default-actions Type=forward,TargetGroupArn=$TARGETARN --output=text --query 'Listeners[*].ListenerArn' 
 
 echo 'Creating Auto Scaling Group...'
 # Create Autoscaling group ASG - needs to come after Target Group is created
 # Create autoscaling group
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/autoscaling/create-auto-scaling-group.html
-aws autoscaling create-auto-scaling-group --auto-scaling-group-name $13 --min-size $15 --max-size $14
+aws autoscaling create-auto-scaling-group --auto-scaling-group-name $13 --launch-template LaunchTemplateId=$LAUNCHTEMPLATEID --min-size $15 --max-size $14
 
 echo 'Waiting for Auto Scaling Group to spin up EC2 instances and attach them to the TargetARN...'
 # Create waiter for registering targets
