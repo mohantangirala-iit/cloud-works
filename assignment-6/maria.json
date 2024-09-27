@@ -1,4 +1,4 @@
 {
-    "user": "mt-secretuser",
-    "pass": "mt-secretpassword"
+    "user" : "mt-secretuser", 
+    "password" : "mt-secretpassword"
 }

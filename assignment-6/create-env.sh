@@ -29,7 +29,7 @@
 # 21 Secret Name
 # 22 Database Name
 
-SECRET_ID=$(aws secretsmanager list-secrets --filters Key=name,Values=${21} --query 'SecretList[*].ARN')
+SECRET_ID=$(aws secretsmanager list-secrets --filters Key=name,Values=${21} --query 'SecretList[*].ARN' --output=text)
 
 if [ $# = 0 ]
     then
